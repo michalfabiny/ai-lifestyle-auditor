@@ -10,30 +10,20 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Načítanie API kľúča z .env súboru do systémových premenných
+# Load environment variables for local development fallback
 load_dotenv()
 
 st.set_page_config(
-    page_title="AI Lifestyle & Budget Auditor", page_icon="📊", layout="wide"
+    page_title="AI Lifestyle & Budget Auditor",
+    page_icon="📊",
+    layout="wide",
 )
-
-
-# Cachujeme klienta, aby sa pri každom kliknutí v UI nevytváral odznova
-@st.cache_resource
-def get_gemini_client():
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        return None
-    return genai.Client(api_key=api_key)
-
-
-client = get_gemini_client()
 
 st.title("📊 AI Lifestyle & Budget Auditor")
 st.markdown(
     "Intelligent personal finance and habit audit powered by **Gemini 3.8 Flash**, **Pydantic**, **Pandas**, and **Plotly**."
 )
-# --- STEP 1: DATA CONTRACT DEFINITION (PYDANTIC SCHEMA - EN) ---
+
 class BudgetCategoryAudit(BaseModel):
     category: str = Field(description="Expense category name")
     amount: float = Field(description="Monthly amount in EUR")
@@ -73,7 +63,7 @@ class AuditReport(BaseModel):
     budget_analysis: list[BudgetCategoryAudit]
     lifestyle_insights: list[LifestyleInsight]
     action_plan: list[ActionStep]
-# --- SIDEBAR: MODE SELECTION & BYOK CONFIGURATION ---
+
 st.sidebar.header("⚙️ Configuration & Mode")
 app_mode = st.sidebar.radio(
     "Select Execution Mode:",
@@ -83,7 +73,7 @@ app_mode = st.sidebar.radio(
 
 user_api_key = ""
 if app_mode == "Live AI Audit (Your API Key)":
-    # Lokálne na tvojom Macu predvyplní kľúč z .env, na verejnom webe bude pole prázdne
+   
     default_key = os.getenv("GEMINI_API_KEY", "")
     user_api_key = st.sidebar.text_input(
         "🔑 Enter your Gemini API Key",
@@ -99,7 +89,7 @@ else:
 
 
 
-# --- STEP 3: SIDEBAR INPUT FORM (EN) ---
+
 st.sidebar.header("📝 Monthly Inputs")
 
 with st.sidebar.form("audit_form"):
@@ -146,12 +136,9 @@ with st.sidebar.form("audit_form"):
     )
     
     
-
     
 
-# Spracovanie po odoslaní formulára
-# --- KROK 4B: VOLANIE GEMINI API V JSON MODE ---
-# --- STEP 4: DATA PROCESSING (DEMO OR LIVE BYOK) & SESSION STATE ---
+
 if submitted:
     total_expenses = housing + food + transport + leisure
     savings = income - total_expenses
@@ -285,7 +272,7 @@ if submitted:
                 except Exception as e:
                     st.error(f"❌ Gemini API Error: {e}")
 
-# --- STEP 5 & 6: PERSISTENT PANDAS TRANSFORMATION & PLOTLY DASHBOARD ---
+
 if "audit_result" in st.session_state:
     audit_result = st.session_state["audit_result"]
     saved_inputs = st.session_state["user_inputs"]
@@ -295,7 +282,7 @@ if "audit_result" in st.session_state:
 
     st.success(f"✅ Audit ready ({st.session_state['run_source']})")
 
-    # 1. Pandas DataFrame & deterministic recalculation
+    
     df_budget = pd.DataFrame(audit_result["budget_analysis"])
     if sav > 0 and inc > 0:
         savings_row = pd.DataFrame([{
